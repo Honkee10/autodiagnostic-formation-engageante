@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Autodiagnostic réflexif pour formateurs : engagement, attention, atteinte des objectifs, ancrage cognitif et innovation pédagogique." />
+<title>Autodiagnostic réflexif du formateur</title>
+<style>
+  :root {
+    --navy: #0b1f3a;
+    --navy-2: #17385f;
+    --turq: #58c7c3;
+    --turq-soft: #e7f8f7;
+    --turq-line: #9dddd9;
+    --white: #ffffff;
+    --soft: #f7fbfc;
+    --muted: #5d6a78;
+    --border: #d6e7e8;
+    --shadow: 0 10px 28px rgba(11,31,58,.08);
+    --radius: 18px;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--navy);
+    background: var(--white);
+    line-height: 1.5;
+  }
+  button, select, input { font: inherit; }
+  button { cursor: pointer; }
+  a { color: var(--navy-2); }
+  .app { min-height: 100vh; display: flex; flex-direction: column; }
+
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(255,255,255,.96);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+  }
+  .header-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 12px 20px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+  .brand-mark {
+    width: 36px; height: 36px; border: 2px solid var(--turq); border-radius: 11px;
+    display: grid; place-items: center; color: var(--navy); background: var(--turq-soft);
+  }
+  .privacy-badge {
+    border: 1px solid var(--turq-line);
+    background: var(--turq-soft);
+    color: var(--navy);
+    border-radius: 999px;
+    padding: 7px 11px;
+    font-size: .83rem;
+    white-space: nowrap;
+  }
+
+  main { width: min(1180px, calc(100% - 32px)); margin: 0 auto; flex: 1; }
+  .screen { display: none; padding: 34px 0 46px; }
+  .screen.active { display: block; }
+
+  .cover {
+    min-height: 72vh;
+    display: grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap: 28px;
+    align-items: center;
+  }
+  .eyebrow {
+    display: inline-block;
+    color: var(--navy-2);
+    border-bottom: 3px solid var(--turq);
+    padding-bottom: 3px;
+    font-weight: 700;
+    letter-spacing: .02em;
+  }
+  h1 { font-size: clamp(2.2rem, 5vw, 4.7rem); line-height: .98; margin: 16px 0 18px; letter-spacing: -.04em; }
+  h2 { font-size: clamp(1.65rem, 3vw, 2.4rem); margin: 0 0 8px; letter-spacing: -.02em; }
+  h3 { margin: 0 0 8px; }
+  .lead { font-size: 1.12rem; color: var(--navy-2); max-width: 760px; }
+  .cover-note, .card, .question, .result-card, .toolbox, .privacy-box {
+    border: 1px solid var(--turq-line);
+    border-radius: var(--radius);
+    background: var(--white);
+    box-shadow: var(--shadow);
+  }
+  .cover-note { padding: 24px; background: linear-gradient(180deg, #fff 0%, var(--turq-soft) 100%); }
+  .cover-note ul { padding-left: 20px; margin-bottom: 0; }
+  .meta { color: var(--muted); font-size: .92rem; }
+
+  .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+  .btn {
+    border: 1px solid var(--navy);
+    border-radius: 12px;
+    padding: 11px 16px;
+    background: var(--navy);
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .btn.secondary { background: white; color: var(--navy); border-color: var(--turq); }
+  .btn.ghost { background: transparent; color: var(--navy); border-color: var(--border); }
+  .btn:focus-visible, .tab:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 3px solid rgba(88,199,195,.35);
+    outline-offset: 2px;
+  }
+
+  .tabs-wrap { margin-top: 18px; }
+  .tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 8px 0 4px;
+    scrollbar-width: thin;
+  }
+  .tab {
+    min-width: max-content;
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--navy);
+    border-radius: 999px;
+    padding: 9px 13px;
+    font-weight: 700;
+  }
+  .tab.active { border-color: var(--turq); background: var(--turq-soft); }
+  .tab .num {
+    display: inline-grid; place-items: center; width: 24px; height: 24px;
+    border-radius: 50%; border: 1px solid var(--turq); margin-right: 6px; font-size: .82rem;
+  }
+  .progress-shell { height: 7px; border-radius: 999px; background: #eaf0f2; margin: 8px 0 0; overflow: hidden; }
+  .progress-bar { height: 100%; width: 0; background: var(--turq); transition: width .25s ease; }
+
+  .section-head { display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: end; margin: 22px 0 18px; }
+  .section-head p { margin: 4px 0 0; color: var(--muted); max-width: 760px; }
+  .axis-chip { border: 1px solid var(--turq); background: var(--turq-soft); padding: 8px 12px; border-radius: 999px; font-weight: 700; }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px; }
+  .card { padding: 18px; box-shadow: none; }
+  label { font-weight: 700; display: block; margin-bottom: 7px; }
+  .hint { font-size: .86rem; color: var(--muted); margin-top: 6px; }
+  select, input[type="text"] {
+    width: 100%; border: 1px solid #b9d6d8; border-radius: 10px; padding: 10px 11px; color: var(--navy); background: white;
+  }
+  fieldset { border: 0; padding: 0; margin: 0; }
+  legend { font-weight: 700; margin-bottom: 10px; }
+  .tool-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+  .tool-option {
+    border: 1px solid var(--border); border-radius: 11px; padding: 10px 11px; display: flex; align-items: flex-start; gap: 8px; background: white;
+  }
+  .tool-option:has(input:checked) { border-color: var(--turq); background: var(--turq-soft); }
+  .tool-option input { margin-top: 4px; accent-color: var(--navy); }
+  .tool-option label { margin: 0; font-weight: 600; font-size: .93rem; }
+
+  .question-list { display: grid; gap: 13px; }
+  .question { padding: 17px; box-shadow: none; }
+  .q-top { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: start; }
+  .q-num { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid var(--turq); border-radius: 11px; background: var(--turq-soft); font-weight: 700; }
+  .question p { margin: 2px 0 10px; }
+  .question select { max-width: 470px; }
+  .question small { color: var(--muted); display: block; margin-top: 6px; }
+
+  .toolbox { padding: 18px; box-shadow: none; margin-top: 16px; background: var(--soft); }
+  .toolbox h3 { margin-bottom: 4px; }
+  .context-q { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--turq-line); }
+  .context-q:first-of-type { border-top: 0; }
+
+  .nav-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 22px; }
+  .validation { margin-top: 12px; color: #75420b; background: #fff9ec; border: 1px solid #ead5a7; padding: 10px 12px; border-radius: 10px; display: none; }
+  .validation.show { display: block; }
+
+  .results-grid { display: grid; grid-template-columns: .74fr 1.26fr; gap: 18px; align-items: stretch; }
+  .result-card { padding: 20px; box-shadow: none; }
+  .score-big { font-size: clamp(3.8rem, 10vw, 6.8rem); line-height: .9; letter-spacing: -.06em; font-weight: 800; margin: 10px 0; }
+  .score-big span { font-size: .36em; letter-spacing: 0; }
+  .score-label { font-size: 1.02rem; color: var(--muted); }
+  .interpretation { border-left: 4px solid var(--turq); padding: 10px 0 10px 14px; margin-top: 16px; }
+  .axis-scores { display: grid; gap: 10px; margin-top: 14px; }
+  .axis-row { display: grid; grid-template-columns: 150px 1fr 48px; gap: 10px; align-items: center; }
+  .axis-row .bar { height: 9px; background: #e9f0f2; border-radius: 999px; overflow: hidden; }
+  .axis-row .fill { height: 100%; background: var(--turq); }
+  .axis-row strong { text-align: right; }
+
+  .radar-shell { min-height: 460px; display: grid; place-items: center; }
+  #radarSvg { width: min(100%, 650px); height: auto; overflow: visible; }
+  .radar-grid { fill: none; stroke: #c8e6e5; stroke-width: 1; }
+  .radar-axis { stroke: #d9e8ea; stroke-width: 1; }
+  .radar-shape { fill: rgba(88,199,195,.22); stroke: var(--navy); stroke-width: 2.5; }
+  .radar-dot { fill: var(--navy); }
+  .radar-label { fill: var(--navy); font-size: 14px; font-weight: 700; text-anchor: middle; dominant-baseline: middle; }
+  .radar-value { fill: var(--muted); font-size: 12px; text-anchor: middle; dominant-baseline: middle; }
+
+  .recommendations { margin-top: 18px; display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+  .recommendation { border: 1px solid var(--turq-line); border-radius: 14px; padding: 15px; background: white; }
+  .recommendation h3 { font-size: 1rem; }
+  .recommendation p { margin-bottom: 0; color: var(--navy-2); }
+  .context-score { margin-top: 12px; padding: 12px; border-radius: 12px; background: var(--turq-soft); border: 1px solid var(--turq-line); }
+
+  details { margin-top: 18px; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; background: white; }
+  summary { cursor: pointer; font-weight: 700; }
+  .method-note { color: var(--muted); font-size: .9rem; }
+
+  footer { border-top: 1px solid var(--border); padding: 18px 20px 26px; text-align: center; color: var(--navy-2); font-size: .86rem; }
+
+  .print-only { display: none; }
+
+  @media (max-width: 900px) {
+    .cover, .results-grid { grid-template-columns: 1fr; }
+    .tool-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .grid-2, .recommendations { grid-template-columns: 1fr; }
+    .section-head { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 560px) {
+    main { width: min(100% - 20px, 1180px); }
+    .header-inner { padding: 10px; }
+    .brand span:last-child { font-size: .9rem; }
+    .privacy-badge { display: none; }
+    .tool-grid { grid-template-columns: 1fr; }
+    .axis-row { grid-template-columns: 110px 1fr 42px; font-size: .86rem; }
+    .radar-shell { min-height: 360px; }
+  }
+
+  @media print {
+    @page { margin: 14mm; }
+    header, .tabs-wrap, .nav-actions, .no-print, #coverScreen, footer { display: none !important; }
+    body, main { background: white; width: 100%; margin: 0; }
+    .screen { display: none !important; padding: 0; }
+    #resultsScreen { display: block !important; }
+    .print-only { display: block; }
+    .results-grid { grid-template-columns: 42% 58%; gap: 10px; }
+    .result-card, .recommendation, details { box-shadow: none; break-inside: avoid; }
+    .radar-shell { min-height: 390px; }
+    .recommendations { grid-template-columns: repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+<header class="no-print">
+  <div class="header-inner">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">◎</span><span>Autodiagnostic réflexif du formateur</span></div>
+    <div class="privacy-badge">Anonyme · aucune donnée transmise</div>
+  </div>
+</header>
+
+<main>
+  <section class="screen active" id="coverScreen" aria-labelledby="coverTitle">
+    <div class="cover">
+      <div>
+        <span class="eyebrow">Engagement · attention · apprentissage · innovation</span>
+        <h1 id="coverTitle">Ma formation a-t-elle vraiment fait apprendre&nbsp;?</h1>
+        <p class="lead">Un autodiagnostic destiné au formateur pour analyser, après une animation, les conditions d’engagement, de maintien de l’attention, d’atteinte des objectifs, d’ancrage cognitif et de pertinence de l’innovation pédagogique.</p>
+        <div class="btn-row">
+          <button class="btn" type="button" id="startBtn">Commencer l’autodiagnostic</button>
+          <button class="btn secondary" type="button" id="methodBtn">Voir les repères méthodologiques</button>
+        </div>
+        <p class="meta">Durée indicative : 8 à 12 minutes. Le score est un support de réflexivité, pas une échelle psychométrique validée.</p>
+      </div>
+      <aside class="cover-note">
+        <h2>Principe</h2>
+        <ul>
+          <li>5 axes analysés dans un radar final ;</li>
+          <li>30 items de réflexivité avec réponses en liste déroulante ;</li>
+          <li>un module contextuel adapté aux modalités et outils choisis ;</li>
+          <li>un score global en pourcentage et des pistes d’amélioration ciblées ;</li>
+          <li>un bouton d’impression des résultats.</li>
+        </ul>
+        <div class="privacy-box" style="margin-top:16px;padding:14px;box-shadow:none;background:white;">
+          <strong>Confidentialité</strong>
+          <p class="meta" style="margin-bottom:0;">Les réponses restent dans la mémoire de cette page. Aucun cookie, aucun stockage local, aucune bibliothèque externe et aucun envoi vers un serveur ne sont utilisés par l’outil. Un hébergeur web peut toutefois conserver ses propres journaux techniques.</p>
+        </div>
+      </aside>
+    </div>
+    <details id="methodDetails">
+      <summary>Repères de conception de l’outil</summary>
+      <div class="method-note">
+        <p>Les dimensions s’appuient sur des repères issus des sciences cognitives de l’apprentissage : orientation de l’attention, engagement actif, feedback, consolidation, récupération active, répétition espacée et transfert. L’innovation pédagogique est traitée comme une réponse pertinente à un besoin d’apprentissage : elle peut être numérique ou non, et doit rester alignée avec les objectifs, le public et le contexte.</p>
+        <p><strong>Repères bibliographiques :</strong> travaux de Stanislas Dehaene sur les piliers de l’apprentissage ; Carpenter, Pan & Butler (2022) sur l’espacement et la récupération ; What Works Clearinghouse sur l’organisation de l’étude ; UNESCO sur l’innovation et la pédagogie numérique.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="screen" id="diagnosticScreen">
+    <div class="tabs-wrap no-print">
+      <div class="tabs" role="tablist" aria-label="Étapes de l’autodiagnostic" id="tabs"></div>
+      <div class="progress-shell" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+    <div id="stepContainer"></div>
+  </section>
+
+  <section class="screen" id="resultsScreen" aria-labelledby="resultsTitle">
+    <div class="print-only">
+      <h1 style="font-size:2rem;margin:0 0 6px;">Autodiagnostic réflexif du formateur</h1>
+      <p class="meta">Résultats générés localement, sans transmission des réponses.</p>
+    </div>
+
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Résultats</span>
+        <h2 id="resultsTitle">Lecture synthétique de la formation</h2>
+        <p>Le radar met en évidence les équilibres entre les cinq dimensions. Le pourcentage global est la moyenne des axes suffisamment renseignés.</p>
+      </div>
+      <div class="axis-chip" id="completionChip">Diagnostic complété</div>
+    </div>
+
+    <div class="results-grid">
+      <div class="result-card">
+        <div class="score-label">Score global</div>
+        <div class="score-big" id="overallScore">—<span>%</span></div>
+        <div class="interpretation" id="interpretationText"></div>
+        <div class="axis-scores" id="axisScores"></div>
+        <div class="context-score" id="contextScoreBox" hidden></div>
+      </div>
+      <div class="result-card radar-shell" aria-label="Graphique radar des résultats">
+        <svg id="radarSvg" viewBox="0 0 620 540" role="img" aria-labelledby="radarTitle radarDesc">
+          <title id="radarTitle">Radar des cinq axes de l’autodiagnostic</title>
+          <desc id="radarDesc">Engagement, attention, objectifs, ancrage cognitif et innovation pédagogique.</desc>
+        </svg>
+      </div>
+    </div>
+
+    <div class="recommendations" id="recommendations"></div>
+
+    <details>
+      <summary>Comment lire le score ?</summary>
+      <div class="method-note">
+        <p><strong>0–49 % :</strong> dimension à retravailler prioritairement. <strong>50–64 % :</strong> pratiques présentes mais irrégulières. <strong>65–79 % :</strong> conception cohérente, avec plusieurs leviers déjà installés. <strong>80–100 % :</strong> dimension étayée par des pratiques fréquentes et observables.</p>
+        <p>L’outil ne mesure pas directement l’apprentissage des participants. Il aide à examiner les choix de conception et les indices observables pendant l’animation. Pour conclure sur l’efficacité, il faut croiser ces résultats avec des preuves d’apprentissage : productions, évaluations, performance différée ou transfert en situation de travail.</p>
+      </div>
+    </details>
+
+    <div class="btn-row no-print">
+      <button class="btn" type="button" id="printBtn">Imprimer les résultats</button>
+      <button class="btn secondary" type="button" id="editBtn">Modifier mes réponses</button>
+      <button class="btn ghost" type="button" id="resetBtn">Réinitialiser</button>
+    </div>
+  </section>
+</main>
+
+<footer>Elaboré par Céline Cornet - ingénieur pédagogique, formatrice- 2026. Sous Licence Creative Common. Réutilisation à l'identique. Pas d'usage commercial.</footer>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  const scaleOptions = [
+    {value:'', label:'— Choisir une réponse —'},
+    {value:'1', label:'1 — Pas du tout / absent'},
+    {value:'2', label:'2 — Rarement / très peu'},
+    {value:'3', label:'3 — Partiellement / irrégulièrement'},
+    {value:'4', label:'4 — Souvent / de façon structurée'},
+    {value:'5', label:'5 — Systématiquement / avec indices observables'},
+    {value:'na', label:'Non applicable'}
+  ];
+
+  const axes = [
+    {
+      id:'engagement', short:'Engagement', title:'Engagement actif',
+      intro:'Les apprenants ont-ils eu à agir, choisir, produire, expliquer ou décider plutôt qu’à seulement recevoir l’information ?',
+      questions:[
+        'J’ai prévu des moments où les apprenants devaient produire une réponse, une décision, une explication ou une réalisation.',
+        'La participation a été répartie dans le groupe et ne reposait pas uniquement sur quelques personnes volontaires.',
+        'Les activités demandaient un effort cognitif réel, sans être ni triviales ni hors de portée du public.',
+        'J’ai sollicité des prédictions, hypothèses ou prises de position avant de donner immédiatement la réponse.',
+        'J’ai observé des signes d’engagement volontaire : questions, échanges, persistance, initiatives ou demandes d’approfondissement.',
+        'Les activités proposées avaient un lien explicite avec les situations ou problèmes rencontrés par les apprenants.'
+      ]
+    },
+    {
+      id:'attention', short:'Attention', title:'Attention et charge cognitive',
+      intro:'La conception a-t-elle orienté les ressources attentionnelles vers les informations utiles sans multiplier les distracteurs ?',
+      questions:[
+        'J’ai clairement signalé ce qui était essentiel, ce qui était secondaire et ce qui devait être retenu.',
+        'Les apports ont été segmentés en unités de taille raisonnable plutôt qu’en longues séquences d’exposition continue.',
+        'J’ai alterné les modalités uniquement lorsqu’elles servaient un objectif pédagogique, et non pour créer de la variété à tout prix.',
+        'Les supports évitaient les informations décoratives, redondantes ou concurrentes susceptibles de disperser l’attention.',
+        'J’ai régulièrement réactivé l’attention par une question, une tâche, une reformulation ou une mise en problème.',
+        'Le rythme, les transitions et les pauses ont été ajustés à la durée de la formation et à l’état du groupe.'
+      ]
+    },
+    {
+      id:'objectifs', short:'Objectifs', title:'Atteinte des objectifs',
+      intro:'Les objectifs ont-ils guidé la conception, les activités et les preuves d’apprentissage recueillies ?',
+      questions:[
+        'Les objectifs étaient formulés en termes observables : ce que l’apprenant devait être capable de faire, expliquer, décider ou réaliser.',
+        'Les apprenants savaient ce qui était attendu d’eux et, lorsque c’était pertinent, les critères de réussite.',
+        'Chaque activité importante entraînait directement une compétence ou une connaissance visée par les objectifs.',
+        'J’ai vérifié la progression en cours de formation, et pas uniquement à la fin.',
+        'L’évaluation finale demandait aux apprenants de mobiliser les acquis dans une tâche alignée avec les objectifs.',
+        'Je dispose d’indices d’atteinte des objectifs autres que la satisfaction déclarée des participants.'
+      ]
+    },
+    {
+      id:'ancrage', short:'Ancrage', title:'Ancrage cognitif',
+      intro:'La formation a-t-elle favorisé encodage en profondeur, récupération, feedback, répétition et transfert ?',
+      questions:[
+        'J’ai fait émerger les connaissances, représentations ou expériences antérieures avant d’introduire les nouveaux contenus.',
+        'Les apprenants ont dû récupérer de mémoire des notions ou procédures sans avoir systématiquement la réponse sous les yeux.',
+        'J’ai donné un feedback suffisamment rapide et explicite pour confirmer, corriger ou préciser les réponses et raisonnements.',
+        'Les apprenants ont reformulé, expliqué avec leurs mots, comparé des exemples ou relié les nouvelles notions à des situations connues.',
+        'Les points essentiels ont été réactivés à plusieurs moments espacés de la formation ou du parcours.',
+        'Une activité a demandé de transférer les acquis vers un cas nouveau, une décision professionnelle ou une action à réaliser après la formation.'
+      ]
+    },
+    {
+      id:'innovation', short:'Innovation', title:'Innovation pédagogique pertinente',
+      intro:'L’innovation est ici comprise comme une transformation utile de l’expérience d’apprentissage, avec ou sans numérique.',
+      questions:[
+        'Le choix d’une méthode ou d’un outil innovant répondait à un problème pédagogique identifié, et non à la recherche de nouveauté en elle-même.',
+        'Le dispositif donnait une place réelle à l’activité, au choix, à l’exploration, à la collaboration ou à la production des apprenants.',
+        'La méthode permettait une forme d’apprentissage difficile à obtenir avec un simple exposé : simulation, feedback, expérimentation, coopération ou adaptation.',
+        'J’ai adapté le dispositif au public, à ses contraintes, à son niveau de maîtrise et aux conditions concrètes de formation.',
+        'L’outil ou la méthode utilisée restait accessible, compréhensible et proportionnée à la valeur pédagogique attendue.',
+        'J’ai recueilli des indices permettant d’améliorer ou de faire évoluer le dispositif lors d’une prochaine session.'
+      ]
+    }
+  ];
+
+  const tools = [
+    ['quiz','Quiz / QCM interactif synchrone','sync'],
+    ['poll','Sondage / nuage de mots','sync'],
+    ['whiteboard','Tableau blanc collaboratif','sync'],
+    ['wall','Mur collaboratif / post-it numériques','sync'],
+    ['virtual','Classe virtuelle / visioconférence interactive','sync'],
+    ['forum','Forum / messagerie pédagogique asynchrone','async'],
+    ['lms','Module e-learning / LMS asynchrone','async'],
+    ['video','Vidéo ou capsule interactive','async'],
+    ['case','Étude de cas','case'],
+    ['role','Mise en situation / jeu de rôle','experiential'],
+    ['simulation','Simulation / atelier pratique','experiential'],
+    ['serious','Serious game','game'],
+    ['escape','Escape game pédagogique','game'],
+    ['cards','Jeu de cartes','game'],
+    ['dice','Jeu de dés / jeu de plateau','game']
+  ];
+
+  const contextPrompts = {
+    sync: {
+      title:'Outils synchrones en ligne',
+      text:'L’outil a servi à faire produire, décider, comparer ou argumenter en temps réel, plutôt qu’à ajouter une interaction superficielle.'
+    },
+    async: {
+      title:'Activités asynchrones',
+      text:'Les consignes, jalons, feedbacks et ressources permettaient une progression autonome sans dépendre d’une présence permanente du formateur.'
+    },
+    case: {
+      title:'Étude de cas',
+      text:'Le cas demandait d’analyser et de décider, puis un débriefing a explicité les critères de raisonnement et le transfert à d’autres situations.'
+    },
+    experiential: {
+      title:'Mise en situation / simulation',
+      text:'La séquence comportait un débriefing structuré permettant de relier l’action, les erreurs, les décisions et les objectifs d’apprentissage.'
+    },
+    game: {
+      title:'Jeux et dispositifs ludiques',
+      text:'Les règles, contraintes et mécanismes du jeu servaient directement les apprentissages, et un débriefing a transformé l’expérience ludique en apprentissage explicite.'
+    }
+  };
+
+  const recommendations = {
+    engagement: {
+      title:'Renforcer l’engagement actif',
+      text:'Remplacer une partie des apports par des tâches de décision, de prédiction, d’explication ou de production. Ajuster le niveau de défi et distribuer la participation dans le groupe.'
+    },
+    attention: {
+      title:'Mieux orienter l’attention',
+      text:'Segmenter les apports, signaler les informations essentielles et supprimer les éléments qui concurrencent la tâche. Réactiver l’attention par des tâches courtes mais signifiantes.'
+    },
+    objectifs: {
+      title:'Rendre l’atteinte des objectifs observable',
+      text:'Aligner objectifs, activités et évaluation. Définir des critères de réussite et recueillir des preuves de progression ou de performance plutôt que la seule satisfaction.'
+    },
+    ancrage: {
+      title:'Soutenir l’ancrage cognitif',
+      text:'Faire récupérer les connaissances de mémoire, réactiver les notions à distance, donner un feedback explicite et proposer un transfert vers un cas nouveau ou une situation professionnelle.'
+    },
+    innovation: {
+      title:'Consolider la valeur de l’innovation',
+      text:'Partir du problème d’apprentissage à résoudre. Vérifier que la méthode transforme réellement l’activité ou le feedback, reste accessible et apporte plus qu’une simple nouveauté de forme.'
+    }
+  };
+
+  const state = {
+    step: 0,
+    context: {},
+    tools: new Set(),
+    axisAnswers: {},
+    contextAnswers: {}
+  };
+  axes.forEach(a => state.axisAnswers[a.id] = Array(a.questions.length).fill(''));
+
+  const steps = [
+    {id:'context', label:'Contexte'},
+    ...axes.map(a => ({id:a.id, label:a.short})),
+    {id:'results', label:'Résultats'}
+  ];
+
+  const coverScreen = document.getElementById('coverScreen');
+  const diagnosticScreen = document.getElementById('diagnosticScreen');
+  const resultsScreen = document.getElementById('resultsScreen');
+  const tabsEl = document.getElementById('tabs');
+  const progressBar = document.getElementById('progressBar');
+  const stepContainer = document.getElementById('stepContainer');
+
+  function selectOptions(selected){
+    return scaleOptions.map(o => `<option value="${o.value}" ${String(selected)===o.value?'selected':''}>${o.label}</option>`).join('');
+  }
+
+  function renderTabs(){
+    tabsEl.innerHTML = steps.map((s,i) => `
+      <button type="button" class="tab ${i===state.step?'active':''}" role="tab" aria-selected="${i===state.step}" data-step="${i}">
+        <span class="num">${i+1}</span>${s.label}
+      </button>`).join('');
+    tabsEl.querySelectorAll('.tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        saveCurrentStep();
+        const target = Number(btn.dataset.step);
+        if(target === steps.length-1){
+          if(!validateCore(true)) return;
+          showResults();
+          return;
+        }
+        state.step = target;
+        renderStep();
+      });
+    });
+    progressBar.style.width = `${(state.step/(steps.length-1))*100}%`;
+  }
+
+  function renderContext(){
+    const ctx = state.context;
+    stepContainer.innerHTML = `
+      <div class="section-head">
+        <div><span class="eyebrow">Étape 1</span><h2>Contexte de la formation</h2><p>Ces informations servent à contextualiser la lecture. Elles ne sont ni enregistrées ni transmises.</p></div>
+        <div class="axis-chip">Non scoré</div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <label for="format">Modalité principale</label>
+          <select id="format">
+            ${optionList(['Présentiel','Distanciel synchrone','Distanciel asynchrone','Hybride / blended','Parcours multimodal'], ctx.format)}
+          </select>
+        </div>
+        <div class="card">
+          <label for="duration">Durée ou organisation</label>
+          <select id="duration">
+            ${optionList(['Moins de 2 heures','Demi-journée','1 journée','2 jours','3 jours ou plus','Parcours réparti dans le temps'], ctx.duration)}
+          </select>
+        </div>
+        <div class="card">
+          <label for="group">Taille du groupe</label>
+          <select id="group">
+            ${optionList(['1 à 8','9 à 15','16 à 25','26 à 50','Plus de 50'], ctx.group)}
+          </select>
+        </div>
+        <div class="card">
+          <label for="level">Niveau du public</label>
+          <select id="level">
+            ${optionList(['Majoritairement novices','Niveau intermédiaire','Majoritairement expérimentés','Groupe hétérogène'], ctx.level)}
+          </select>
+        </div>
+        <div class="card">
+          <label for="intent">Intention d’apprentissage dominante</label>
+          <select id="intent">
+            ${optionList(['Acquérir des connaissances','Raisonner / décider','Acquérir un geste ou une procédure','Développer une posture / communication','Manager / organiser / conduire un projet','Combiner plusieurs finalités'], ctx.intent)}
+          </select>
+        </div>
+        <div class="card">
+          <label for="evidence">Preuve d’apprentissage principalement utilisée</label>
+          <select id="evidence">
+            ${optionList(['Aucune preuve formalisée','Quiz / test de connaissances','Production ou exercice corrigé','Observation d’une mise en situation','Étude de cas / résolution de problème','Évaluation différée / transfert en situation de travail'], ctx.evidence)}
+          </select>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <fieldset>
+          <legend>Outils et modalités utilisés <span class="meta">— plusieurs choix possibles</span></legend>
+          <div class="tool-grid">
+            ${tools.map(([id,label]) => `<div class="tool-option"><input type="checkbox" id="tool_${id}" value="${id}" ${state.tools.has(id)?'checked':''}><label for="tool_${id}">${label}</label></div>`).join('')}
+          </div>
+        </fieldset>
+        <p class="hint">Le nombre d’outils n’augmente pas le score d’innovation. L’outil évalue leur pertinence et leur articulation avec l’apprentissage.</p>
+      </div>
+
+      <div class="toolbox" id="contextualBox">
+        <h3>Questions adaptées à tes choix</h3>
+        <p class="meta">Elles servent de miroir contextuel et sont affichées séparément du score principal.</p>
+        <div id="contextualQuestions"></div>
+      </div>
+
+      <div class="nav-actions"><span></span><button class="btn" type="button" id="nextBtn">Continuer</button></div>
+    `;
+
+    tools.forEach(([id]) => document.getElementById('tool_'+id).addEventListener('change', e => {
+      if(e.target.checked) state.tools.add(id); else state.tools.delete(id);
+      renderContextualQuestions();
+    }));
+    ['format','duration','group','level','intent','evidence'].forEach(id => {
+      document.getElementById(id).addEventListener('change', e => state.context[id]=e.target.value);
+    });
+    renderContextualQuestions();
+    document.getElementById('nextBtn').addEventListener('click', () => { saveCurrentStep(); state.step=1; renderStep(); });
+  }
+
+  function optionList(values, selected){
+    return `<option value="">— Choisir —</option>` + values.map(v=>`<option value="${v}" ${selected===v?'selected':''}>${v}</option>`).join('');
+  }
+
+  function activeCategories(){
+    const cats = [];
+    for(const id of state.tools){
+      const tool = tools.find(t=>t[0]===id);
+      if(tool && !cats.includes(tool[2])) cats.push(tool[2]);
+    }
+    return cats;
+  }
+
+  function renderContextualQuestions(){
+    const host = document.getElementById('contextualQuestions');
+    if(!host) return;
+    const cats = activeCategories();
+    if(cats.length===0){
+      host.innerHTML = '<p class="meta">Sélectionne au moins un outil pour afficher les questions contextuelles.</p>';
+      return;
+    }
+    host.innerHTML = cats.map(cat => {
+      const p = contextPrompts[cat];
+      return `<div class="context-q"><label for="ctx_${cat}">${p.title}</label><p>${p.text}</p><select id="ctx_${cat}" data-context-cat="${cat}">${selectOptions(state.contextAnswers[cat] || '')}</select></div>`;
+    }).join('');
+    host.querySelectorAll('[data-context-cat]').forEach(sel => sel.addEventListener('change', e => state.contextAnswers[e.target.dataset.contextCat]=e.target.value));
+  }
+
+  function renderAxis(axisIndex){
+    const axis = axes[axisIndex];
+    const answers = state.axisAnswers[axis.id];
+    stepContainer.innerHTML = `
+      <div class="section-head">
+        <div><span class="eyebrow">Axe ${axisIndex+1} / ${axes.length}</span><h2>${axis.title}</h2><p>${axis.intro}</p></div>
+        <div class="axis-chip">6 items</div>
+      </div>
+      <div class="question-list">
+        ${axis.questions.map((q,i)=>`
+          <div class="question">
+            <div class="q-top"><div class="q-num">${i+1}</div><div><p><strong>${q}</strong></p><select aria-label="Question ${i+1} - ${axis.title}" data-axis="${axis.id}" data-index="${i}">${selectOptions(answers[i])}</select><small>Choisis « Non applicable » uniquement si l’item n’a pas de sens dans ce dispositif.</small></div></div>
+          </div>`).join('')}
+      </div>
+      <div class="validation" id="validationMsg">Pour un score interprétable, renseigne au moins 4 items sur 6 pour cet axe.</div>
+      <div class="nav-actions"><button class="btn secondary" type="button" id="prevBtn">Précédent</button><button class="btn" type="button" id="nextBtn">${axisIndex===axes.length-1?'Voir mes résultats':'Continuer'}</button></div>
+    `;
+    stepContainer.querySelectorAll('[data-axis]').forEach(sel => sel.addEventListener('change', e => {
+      state.axisAnswers[e.target.dataset.axis][Number(e.target.dataset.index)] = e.target.value;
+      document.getElementById('validationMsg').classList.remove('show');
+    }));
+    document.getElementById('prevBtn').addEventListener('click', ()=>{ saveCurrentStep(); state.step--; renderStep(); });
+    document.getElementById('nextBtn').addEventListener('click', ()=>{
+      saveCurrentStep();
+      if(validCount(axis.id)<4){ document.getElementById('validationMsg').classList.add('show'); return; }
+      if(axisIndex===axes.length-1){
+        if(!validateCore(true)) return;
+        showResults();
+      } else { state.step++; renderStep(); }
+    });
+  }
+
+  function renderStep(){
+    coverScreen.classList.remove('active');
+    resultsScreen.classList.remove('active');
+    diagnosticScreen.classList.add('active');
+    renderTabs();
+    const step = steps[state.step];
+    if(step.id==='context') renderContext();
+    else {
+      const axisIndex = axes.findIndex(a=>a.id===step.id);
+      if(axisIndex>=0) renderAxis(axisIndex);
+    }
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function saveCurrentStep(){
+    if(state.step===0){
+      ['format','duration','group','level','intent','evidence'].forEach(id => {
+        const el=document.getElementById(id); if(el) state.context[id]=el.value;
+      });
+      const host=document.getElementById('contextualQuestions');
+      if(host) host.querySelectorAll('[data-context-cat]').forEach(sel=>state.contextAnswers[sel.dataset.contextCat]=sel.value);
+    } else if(state.step>=1 && state.step<=axes.length){
+      const axis = axes[state.step-1];
+      stepContainer.querySelectorAll(`[data-axis="${axis.id}"]`).forEach(sel=>state.axisAnswers[axis.id][Number(sel.dataset.index)]=sel.value);
+    }
+  }
+
+  function validCount(axisId){ return state.axisAnswers[axisId].filter(v=>v && v!=='na').length; }
+
+  function validateCore(showMessage){
+    const incomplete = axes.filter(a=>validCount(a.id)<4);
+    if(incomplete.length && showMessage){
+      state.step = 1 + axes.findIndex(a=>a.id===incomplete[0].id);
+      renderStep();
+      const msg=document.getElementById('validationMsg'); if(msg) msg.classList.add('show');
+    }
+    return incomplete.length===0;
+  }
+
+  function axisScore(axisId){
+    const vals = state.axisAnswers[axisId].filter(v=>v && v!=='na').map(Number);
+    if(vals.length<4) return null;
+    const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+    return Math.round(((avg-1)/4)*100);
+  }
+
+  function contextScore(){
+    const active = activeCategories();
+    const vals = active.map(c=>state.contextAnswers[c]).filter(v=>v && v!=='na').map(Number);
+    if(!vals.length) return null;
+    return Math.round(((vals.reduce((a,b)=>a+b,0)/vals.length - 1)/4)*100);
+  }
+
+  function interpretation(score){
+    if(score<50) return '<strong>Priorité de conception.</strong> Plusieurs conditions d’apprentissage semblent peu présentes ou peu observables. Choisis un ou deux axes à retravailler avant la prochaine session.';
+    if(score<65) return '<strong>À consolider.</strong> Les leviers sont présents mais encore irréguliers. Le gain principal viendra de leur systématisation et de la collecte de preuves d’apprentissage.';
+    if(score<80) return '<strong>Conception cohérente.</strong> Plusieurs conditions favorables sont installées. Le radar permet d’identifier l’axe qui mérite le prochain effort de conception.';
+    return '<strong>Pratiques bien étayées.</strong> Les cinq dimensions sont globalement soutenues par des choix observables. Le prochain enjeu est de vérifier leur effet sur la performance différée et le transfert.';
+  }
+
+  function showResults(){
+    saveCurrentStep();
+    if(!validateCore(false)) return;
+    const scores = axes.map(a=>({id:a.id, label:a.short, score:axisScore(a.id)}));
+    const overall = Math.round(scores.reduce((s,x)=>s+x.score,0)/scores.length);
+
+    diagnosticScreen.classList.remove('active');
+    coverScreen.classList.remove('active');
+    resultsScreen.classList.add('active');
+    document.getElementById('overallScore').innerHTML = `${overall}<span>%</span>`;
+    document.getElementById('interpretationText').innerHTML = interpretation(overall);
+    document.getElementById('axisScores').innerHTML = scores.map(x=>`
+      <div class="axis-row"><span>${x.label}</span><div class="bar"><div class="fill" style="width:${x.score}%"></div></div><strong>${x.score}%</strong></div>`).join('');
+
+    const cScore = contextScore();
+    const cBox=document.getElementById('contextScoreBox');
+    if(cScore!==null){
+      cBox.hidden=false;
+      cBox.innerHTML=`<strong>Usage contextualisé des outils : ${cScore}%</strong><br><span class="meta">Indice séparé : il ne modifie pas le score global. Il examine l’alignement entre les outils choisis et leur usage pédagogique.</span>`;
+    } else cBox.hidden=true;
+
+    drawRadar(scores.map(x=>x.score));
+    renderRecommendations(scores, cScore);
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function renderRecommendations(scores, cScore){
+    const host=document.getElementById('recommendations');
+    const ordered=[...scores].sort((a,b)=>a.score-b.score);
+    const chosen = ordered.slice(0,2);
+    const cards = chosen.map(x=>{
+      const r=recommendations[x.id];
+      return `<article class="recommendation"><h3>${r.title} · ${x.score}%</h3><p>${r.text}</p></article>`;
+    });
+    if(cScore!==null && cScore<65){
+      cards.push(`<article class="recommendation"><h3>Revoir l’usage des outils · ${cScore}%</h3><p>Pour chaque outil retenu, formule la fonction pédagogique précise : faire récupérer, décider, simuler, coopérer, recevoir un feedback ou transférer. Si la fonction reste floue, simplifie le dispositif.</p></article>`);
+    }
+    const best=[...scores].sort((a,b)=>b.score-a.score)[0];
+    cards.push(`<article class="recommendation"><h3>Point d’appui · ${best.label} ${best.score}%</h3><p>Conserve les pratiques de cet axe et utilise-les comme référence pour concevoir les dimensions moins installées.</p></article>`);
+    host.innerHTML=cards.join('');
+  }
+
+  function polar(cx,cy,r,angleDeg){
+    const rad=(angleDeg-90)*Math.PI/180;
+    return [cx+r*Math.cos(rad), cy+r*Math.sin(rad)];
+  }
+
+  function drawRadar(values){
+    const svg=document.getElementById('radarSvg');
+    const cx=310, cy=265, maxR=175, n=axes.length;
+    const labelR=228, valueR=207;
+    let html='<title id="radarTitle">Radar des cinq axes de l’autodiagnostic</title><desc id="radarDesc">Scores en pourcentage pour engagement, attention, objectifs, ancrage cognitif et innovation.</desc>';
+    [20,40,60,80,100].forEach(level=>{
+      const pts=[]; for(let i=0;i<n;i++){ const [x,y]=polar(cx,cy,maxR*level/100,i*360/n); pts.push(`${x},${y}`); }
+      html += `<polygon class="radar-grid" points="${pts.join(' ')}"></polygon>`;
+    });
+    for(let i=0;i<n;i++){
+      const [x,y]=polar(cx,cy,maxR,i*360/n); html += `<line class="radar-axis" x1="${cx}" y1="${cy}" x2="${x}" y2="${y}"></line>`;
+    }
+    const shape=[];
+    values.forEach((v,i)=>{ const [x,y]=polar(cx,cy,maxR*v/100,i*360/n); shape.push(`${x},${y}`); });
+    html += `<polygon class="radar-shape" points="${shape.join(' ')}"></polygon>`;
+    values.forEach((v,i)=>{
+      const [x,y]=polar(cx,cy,maxR*v/100,i*360/n); html += `<circle class="radar-dot" cx="${x}" cy="${y}" r="4"></circle>`;
+      const [lx,ly]=polar(cx,cy,labelR,i*360/n); const [vx,vy]=polar(cx,cy,valueR,i*360/n);
+      html += `<text class="radar-label" x="${lx}" y="${ly}">${axes[i].short}</text><text class="radar-value" x="${vx}" y="${vy}">${v}%</text>`;
+    });
+    svg.innerHTML=html;
+  }
+
+  function resetAll(){
+    state.step=0; state.context={}; state.tools.clear(); state.contextAnswers={}; axes.forEach(a=>state.axisAnswers[a.id]=Array(a.questions.length).fill(''));
+    resultsScreen.classList.remove('active'); diagnosticScreen.classList.remove('active'); coverScreen.classList.add('active'); window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  document.getElementById('startBtn').addEventListener('click', ()=>{ state.step=0; renderStep(); });
+  document.getElementById('methodBtn').addEventListener('click', ()=>{ const d=document.getElementById('methodDetails'); d.open=true; d.scrollIntoView({behavior:'smooth', block:'center'}); });
+  document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+  document.getElementById('editBtn').addEventListener('click', ()=>{ state.step=0; renderStep(); });
+  document.getElementById('resetBtn').addEventListener('click', ()=>{ if(window.confirm('Réinitialiser toutes les réponses ?')) resetAll(); });
+})();
+</script>
+</body>
+</html>
